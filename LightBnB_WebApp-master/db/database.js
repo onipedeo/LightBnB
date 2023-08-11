@@ -1,6 +1,3 @@
-const properties = require("./json/properties.json");
-const users = require("./json/users.json");
-
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -9,7 +6,6 @@ const pool = new Pool({
   host: 'localhost',
   database: 'lightbnb'
 });
-
 
 /// Users
 
@@ -30,7 +26,7 @@ const getUserWithEmail = function(email) {
   return pool
     .query(queryString, values)
     .then(res => {
-      //checking if the provided email does not exist in the db
+      //checking if the provided email does not exist
       if (res.rows.length === 0) {
         return null;
       }
@@ -77,10 +73,10 @@ const getUserWithId = function(id) {
  */
 const addUser = function(user) {
   const queryString = `
-INSERT INTO users (name, email, password)
-VALUES ($1, $2, $3)
-RETURNING *
-`;
+  INSERT INTO users (name, email, password)
+  VALUES ($1, $2, $3)
+  RETURNING *
+  `;
   const values = [user.name, user.email, user.password];
   return pool
     .query(queryString, values)
@@ -103,13 +99,13 @@ const getAllReservations = function(guest_id, limit = 10) {
 
   const queryString = `
   SELECT reservations.*, properties.*, avg(rating) as average_rating
-FROM reservations
-JOIN properties ON reservations.property_id = properties.id
-JOIN property_reviews ON properties.id = property_reviews.property_id
-WHERE reservations.guest_id = $1
-GROUP BY properties.id, reservations.id
-ORDER BY reservations.start_date
-LIMIT $2;
+  FROM reservations
+  JOIN properties ON reservations.property_id = properties.id
+  JOIN property_reviews ON properties.id = property_reviews.property_id
+  WHERE reservations.guest_id = $1
+  GROUP BY properties.id, reservations.id
+  ORDER BY reservations.start_date
+  LIMIT $2;
   `;
 
   return pool
